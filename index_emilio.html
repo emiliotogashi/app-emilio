@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guia Alimentar - Emilio Makoto Togashi</title>
+  <link rel="manifest" href="manifest.json" />
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+    .app {
+      max-width: 480px;
+      margin: auto;
+      padding: 20px 15px 40px;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    h1 {
+      margin-bottom: 8px;
+      color: #14532d;
+      font-size: 30px;
+    }
+    .patient-name {
+      margin: 0 0 20px;
+      color: #166534;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .screen {
+      display: none;
+    }
+    .screen.active {
+      display: block;
+    }
+    .meal-button {
+      width: 100%;
+      text-align: left;
+      padding: 16px;
+      border: none;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .action-button {
+      width: 100%;
+      text-align: center;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .mini-button {
+      width: 100%;
+      text-align: center;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .cafe { background: #d97706; }
+    .lanche { background: #2563eb; }
+    .almoco { background: #16a34a; }
+    .lanche-tarde { background: #7c3aed; }
+    .jantar { background: #0f766e; }
+    .ceia { background: #be185d; }
+    .favoritos-btn { background: #1d4ed8; }
+    .compras-btn { background: #0f766e; }
+    .receitas-btn { background: #ea580c; }
+
+    .option-title {
+      margin: 0 0 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 18px;
+      color: white;
+      background: #14532d;
+    }
+    .option-subtitle {
+      font-size: 13px;
+      color: #166534;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .sub {
+      color: #555;
+      margin-bottom: 10px;
+    }
+    .details {
+      margin: 10px 0;
+      padding-left: 18px;
+      color: #222;
+    }
+    .details li {
+      margin-bottom: 6px;
+    }
+    button {
+      padding: 10px 12px;
+      border: none;
+      border-radius: 10px;
+      background: #16a34a;
+      color: white;
+      cursor: pointer;
+    }
+    .back-btn {
+      background: #111;
+      margin-bottom: 14px;
+    }
+    .back-bottom-btn {
+      width: 100%;
+      background: #dc2626;
+      margin-top: 16px;
+    }
+    .hidden {
+      display: none;
+    }
+    .food-row {
+      margin: 10px 0;
+      padding: 10px;
+      background: #fafafa;
+      border-radius: 12px;
+      border: 1px solid #eee;
+    }
+    .food-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .sub-btn {
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+    .substitutions {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f1f5f9;
+      border-radius: 12px;
+    }
+    .substitutions ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+    .substitutions li {
+      margin-bottom: 6px;
+    }
+    .note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+    }
+    .fav-list, .print-list {
+      padding-left: 18px;
+    }
+    .fav-list li, .print-list li {
+      margin-bottom: 8px;
+    }
+    .shopping-category {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #e5e7eb;
+      font-weight: bold;
+    }
+    .shopping-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      padding: 8px 10px;
+      background: #fafafa;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .shopping-item.checked {
+      text-decoration: line-through;
+      color: #888;
+      background: #ecfdf5;
+    }
+    .small-note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+    }
+    hr.soft {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 14px 0;
+    }
+    .print-card {
+      background: #fff7ed;
+      border: 1px dashed #fb923c;
+    }
+    .print-empty {
+      color: #777;
+      font-style: italic;
+    }
+    .recipe-card {
+      background: #fffaf5;
+      border: 1px solid #fed7aa;
+    }
+    .recipe-title {
+      margin: 0 0 8px;
+      color: #9a3412;
+      font-size: 18px;
+    }
+    .shopping-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 12px 0 4px;
+    }
+    .clear-btn { background: #b91c1c; }
+    .share-btn { background: #2563eb; }
+    .pdf-btn { background: #7c3aed; }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #pdfArea, #pdfArea * {
+        visibility: visible;
+      }
+      #pdfArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Guia Alimentar</h1>
+    <div class="patient-name">Emilio Makoto Togashi</div>
+
+    <!-- HOME -->
+    <div id="home" class="screen active">
+      <div class="card">
+        <div class="sub">Escolha a refeição que você quer consultar.</div>
+
+        <button class="meal-button cafe" onclick="openMeal('cafeScreen')">☀️ Café da manhã</button>
+        <button class="meal-button lanche" onclick="openMeal('lancheScreen')">🍎 Lanche da manhã</button>
+        <button class="meal-button almoco" onclick="openMeal('almocoScreen')">🍽️ Almoço</button>
+        <button class="meal-button lanche-tarde" onclick="openMeal('lancheTardeScreen')">☕ Lanche da tarde</button>
+        <button class="meal-button jantar" onclick="openMeal('jantarScreen')">🌙 Jantar</button>
+        <button class="meal-button ceia" onclick="openMeal('ceiaScreen')">🌜 Ceia</button>
+
+        <hr class="soft">
+
+        <button class="action-button favoritos-btn" onclick="openMeal('favScreen')">⭐ Favoritos</button>
+        <button class="action-button compras-btn" onclick="openMeal('shoppingScreen')">🛒 Lista de compras</button>
+        <button class="action-button receitas-btn" onclick="openMeal('recipesScreen')">📖 Receitas</button>
+      </div>
+    </div>
+
+    <!-- FAVORITOS -->
+    <div id="favScreen" class="screen">
+      <button class="back-btn" onclick="goHome()">← Voltar</button>
+      <div class="card">
+        <h3 class="option-title" style="background:#1d4ed8;">Favoritos</h3>
+        <ul id="list" class="fav-list"></ul>
+      </div>
+      <button class="back-bottom-btn" onclick="goHome()">Voltar</button>
+    </div>
+
+    <!-- LISTA DE COMPRAS -->
+    <div id="shoppingScreen" class="screen">
+      <button class="back-btn" onclick="goHome()">← Voltar</button>
+      <div class="card">
+        <h3 class="option-title" style="background:#0f766e;">Lista de compras</h3>
+        <div class="sub">Toque no item para marcar. Está organizada por tipo de produto e em ordem alfabética.</div>
+
+        <div class="shopping-actions">
+          <button class="mini-button clear-btn" onclick="clearShopping()">🧹 Limpar lista</button>
+          <button class="mini-button share-btn" onclick="shareShoppingList()">📤 Compartilhar lista</button>
+          <button class="mini-button pdf-btn" onclick="generateShoppingPDF()">📄 Gerar PDF</button>
+        </div>
+
+        <div id="shoppingContainer"></div>
+        <div class="small-note">Dica: marque o que precisa e use a lista pronta no final para tirar print.</div>
+      </div>
+
+      <div class="card print-card" id="pdfArea">
+        <h3 class="option-title" style="background:#ea580c;">Minha lista para print</h3>
+        <div class="sub">Só aparecem aqui os itens que você marcou acima.</div>
+        <div id="printListContainer"></div>
+      </div>
+
+      <button class="back-bottom-btn" onclick="goHome()">Voltar</button>
+    </div>
+
+    <!-- RECEITAS -->
+    <div id="recipesScreen" class="screen">
+      <button class="back-btn" onclick="goHome()">← Voltar</button>
+
+      <div class="card recipe-card">
+        <h3 class="recipe-title">🍳 Ovos cozidos cremosos</h3>
+        <div class="sub"><strong>Ingredientes</strong></div>
+        <ul class="details">
+          <li>1 ovo cozido</li>
+          <li>1 colher de sobremesa de requeijão light</li>
+          <li>3 tomatinhos cereja</li>
+          <li>Temperos a gosto</li>
+        </ul>
+        <div class="sub"><strong>Modo de preparo</strong></div>
+        <p>Pique os ovos em cubinhos pequenos, junte todos os ingredientes e pronto.</p>
+      </div>
+
+      <div class="card recipe-card">
+        <h3 class="recipe-title">🥞 Panqueca de banana</h3>
+        <div class="sub"><strong>Ingredientes</strong></div>
+        <ul class="details">
+          <li>1 banana</li>
+          <li>1 ovo</li>
+          <li>2 colheres de sopa de aveia</li>
+        </ul>
+        <div class="sub"><strong>Modo de preparo</strong></div>
+        <p>Amasse a banana, junte os demais ingredientes e misture até ficar homogêneo. Em uma frigideira antiaderente aquecida, coloque a massa e deixe cozinhar até as bordas dourarem.</p>
+      </div>
+
+      <div class="card recipe-card">
+        <h3 class="recipe-title">🍫 Bolo de chocolate de caneca, sem açúcar</h3>
+        <div class="sub"><strong>Ingredientes</strong></div>
+        <ul class="details">
+          <li>1 colher de sopa de cacau em pó</li>
+          <li>2 colheres de sopa de farelo de aveia</li>
+          <li>2 colheres de sopa de leite desnatado</li>
+          <li>1 ovo</li>
+          <li>1 colher de sopa de adoçante</li>
+          <li>1 colher de chá de fermento em pó</li>
+        </ul>
+        <div class="sub"><strong>Modo de preparo</strong></div>
+        <p>Bata ligeiramente o ovo. Adicione o cacau, o adoçante, o farelo de aveia e o leite. Misture bem até ficar homogêneo. Acrescente o fermento, transfira para uma caneca e leve ao micro-ondas por 2 minutos. Espere esfriar e sirva.</p>
+      </div>
+
+      <div class="card recipe-card">
+        <h3 class="recipe-title">🥗 Salada de macarrão</h3>
+        <div class="sub"><strong>Ingredientes</strong></div>
+        <ul class="details">
+          <li>1 colher de sopa de azeite de oliva</li>
+          <li>1/2 cebola roxa</li>
+          <li>5 dentes de alho</li>
+          <li>1 maço de espinafre</li>
+          <li>1 brócolis cozido</li>
+          <li>1/2 pacote de macarrão integral cozido al dente</li>
+          <li>1 caixinha de tomate cereja cortado ao meio</li>
+          <li>1 xícara de chá de queijo branco ou frango ou atum, 250g</li>
+          <li>1 colher de sopa de gergelim preto</li>
+        </ul>
+        <div class="sub"><strong>Modo de preparo</strong></div>
+        <p>Refogue o azeite com cebola e alho até dourar. Junte o espinafre e o brócolis. Acrescente o macarrão cozido, o queijo branco, frango ou atum e o tomate. Misture, desligue o fogo, transfira para uma tigela, adicione o gergelim e leve à geladeira por 30 minutos antes de servir.</p>
+      </div>
+
+      <button class="back-bottom-btn" onclick="goHome()">Voltar</button>
+    </div>
+
+    <!-- TELAS DE REFEIÇÃO -->
+    <div id="cafeScreen" class="screen"></div>
+    <div id="lancheScreen" class="screen"></div>
+    <div id="almocoScreen" class="screen"></div>
+    <div id="lancheTardeScreen" class="screen"></div>
+    <div id="jantarScreen" class="screen"></div>
+    <div id="ceiaScreen" class="screen"></div>
+  </div>
+
+  <script>
+    let favs = JSON.parse(localStorage.getItem('favs') || '[]');
+    let shoppingChecks = JSON.parse(localStorage.getItem('shoppingChecks') || '{}');
+
+    const substitutions = {
+      carbo: [
+        "Arroz integral - 4 a 5 colheres de sopa cheias, 100g",
+        "Arroz branco - 4 a 5 colheres de sopa cheias, 100g",
+        "Batata inglesa - 1 unidade média ou 120 a 130g",
+        "Batata doce - 1 unidade média ou 120 a 130g",
+        "Mandioquinha - 1 unidade média ou 120 a 130g",
+        "Mandioca - 1 unidade média ou 120 a 130g",
+        "Macarrão - 4 a 5 colheres de sopa cheias, 100g",
+        "Pão integral - 2 fatias",
+        "Pão francês - 1 unidade",
+        "Pão sírio pequeno - 1 unidade",
+        "Pão de forma - 2 fatias",
+        "Cuscuz - 4 a 5 colheres de sopa cheias, 100g",
+        "Quinoa - 4 a 5 colheres de sopa cheias, 100g",
+        "Milho - 1 unidade média ou 120 a 130g",
+        "Polenta - 4 a 5 colheres de sopa cheias, 100g",
+        "Rap10 integral - 1 a 2 unidades",
+        "Torrada integral - porção equivalente"
+      ],
+      leguminosa: [
+        "Feijão preto - 1 concha média ou 4 colheres de sopa cheias, 100g",
+        "Feijão branco - 1 concha média ou 4 colheres de sopa cheias, 100g",
+        "Feijão carioca - 1 concha média ou 4 colheres de sopa cheias, 100g",
+        "Ervilha - 1 concha média ou 4 colheres de sopa cheias, 100g",
+        "Grão-de-bico - 1 concha média ou 4 colheres de sopa cheias, 100g",
+        "Lentilha - 1 concha média ou 4 colheres de sopa cheias, 100g",
+        "Soja - 1 concha média ou 4 colheres de sopa cheias, 100g"
+      ],
+      proteina: [
+        "Ovos - 2 unidades médias, 100g",
+        "Patinho - 1 filé médio ou palma da mão, 100 a 120g",
+        "Maminha - 1 filé médio ou palma da mão, 100 a 120g",
+        "Filé mignon - 1 filé médio ou palma da mão, 100 a 120g",
+        "Coxão mole - 1 filé médio ou palma da mão, 100 a 120g",
+        "Lagarto - 1 filé médio ou palma da mão, 100 a 120g",
+        "Peito de frango - 1 filé médio, 100 a 120g",
+        "Frango desfiado - 100 a 120g",
+        "Tilápia - 1 filé médio, 100 a 120g",
+        "Pescada - 1 filé médio, 100 a 120g",
+        "Merluza - 1 filé médio, 100 a 120g",
+        "Lombo suíno magro - 1 filé médio, 100 a 120g"
+      ],
+      laticinio: [
+        "Leite integral - 1 copo, 200ml",
+        "Leite desnatado - 1 copo, 200ml",
+        "Leite semidesnatado - 1 copo, 200ml",
+        "Iogurte natural - 1 copo, 200ml",
+        "Iogurte zero - 1 unidade",
+        "Iogurte grego - 1 pote, 100 a 120g",
+        "Ricota - 3 colheres de sopa cheias, 80g",
+        "Cottage - 3 colheres de sopa cheias, 80g",
+        "Minas frescal - porção equivalente",
+        "Muçarela - 1 fatia média, 30g",
+        "Queijo prato - 1 fatia média, 30g",
+        "Queijo coalho - 1 fatia média, 30g",
+        "Requeijão light - porção equivalente",
+        "Creme de ricota - porção equivalente"
+      ],
+      fruta: [
+        "Abacate - 1 unidade média ou 1 xícara picada, 120g",
+        "Abacaxi - 1 unidade média ou 1 xícara picada, 120g",
+        "Ameixa - 1 unidade média ou 1 xícara picada, 120g",
+        "Banana - 1 unidade média ou 1 xícara picada, 120g",
+        "Caqui - 1 unidade média ou 1 xícara picada, 120g",
+        "Goiaba - 1 unidade média ou 1 xícara picada, 120g",
+        "Kiwi - 1 unidade média ou 1 xícara picada, 120g",
+        "Laranja - 1 unidade média ou 1 xícara picada, 120g",
+        "Maçã - 1 unidade média ou 1 xícara picada, 120g",
+        "Mamão - 1 unidade média ou 1 xícara picada, 120g",
+        "Melancia - 1 unidade média ou 1 xícara picada, 120g",
+        "Melão - 1 unidade média ou 1 xícara picada, 120g",
+        "Morango - 1 unidade média ou 1 xícara picada, 120g",
+        "Pêra - 1 unidade média ou 1 xícara picada, 120g",
+        "Pêssego - 1 unidade média ou 1 xícara picada, 120g",
+        "Uva - 1 unidade média ou 1 xícara picada, 120g"
+      ],
+      frutaVitC: [
+        "Acerola - 1 unidade média ou 1 xícara picada, 120g",
+        "Caju - 1 unidade média ou 1 xícara picada, 120g",
+        "Mexerica - 1 unidade média ou 1 xícara picada, 120g",
+        "Goiaba - 1 unidade média ou 1 xícara picada, 120g",
+        "Mamão - 1 unidade média ou 1 xícara picada, 120g",
+        "Kiwi - 1 unidade média ou 1 xícara picada, 120g",
+        "Manga - 1 unidade média ou 1 xícara picada, 120g",
+        "Morango - 1 unidade média ou 1 xícara picada, 120g",
+        "Laranja - 1 unidade média ou 1 xícara picada, 120g",
+        "Limão - 1 unidade média ou 1 xícara picada, 120g",
+        "Abacaxi - 1 unidade média ou 1 xícara picada, 120g"
+      ],
+      legumes: [
+        "Brócolis - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Couve-flor - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Vagem - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Chuchu - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Berinjela - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Beterraba - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Cenoura - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Palmito - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Tomate - à vontade",
+        "Pimentão - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Abóbora - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Abobrinha - 1 concha média ou 1 xícara cheia, 80 a 100g",
+        "Repolho - 1 concha média ou 1 xícara cheia, 80 a 100g"
+      ],
+      folhas: [
+        "Alface - 1 prato cheio ou 2 xícaras bem cheias",
+        "Rúcula - 1 prato cheio ou 2 xícaras bem cheias",
+        "Agrião - 1 prato cheio ou 2 xícaras bem cheias",
+        "Escarola - 1 prato cheio ou 2 xícaras bem cheias",
+        "Acelga - 1 prato cheio ou 2 xícaras bem cheias",
+        "Repolho - 1 prato cheio ou 2 xícaras bem cheias",
+        "Couve - 1 prato cheio ou 2 xícaras bem cheias",
+        "Espinafre - 1 prato cheio ou 2 xícaras bem cheias",
+        "Chicória - 1 prato cheio ou 2 xícaras bem cheias",
+        "Almeirão - 1 prato cheio ou 2 xícaras bem cheias"
+      ],
+      sementes: [
+        "Amaranto - 1 a 2 colheres de sopa cheias, 15 a 20g",
+        "Chia - 1 a 2 colheres de sopa cheias, 15 a 20g",
+        "Linhaça - 1 a 2 colheres de sopa cheias, 15 a 20g",
+        "Quinoa - 1 a 2 colheres de sopa cheias, 15 a 20g",
+        "Granola - 1 a 2 colheres de sopa cheias, 15 a 20g",
+        "Aveia - 1 a 2 colheres de sopa cheias, 15 a 20g",
+        "Semente de abóbora - 1 a 2 colheres de sopa cheias, 15 a 20g",
+        "Semente de girassol - 1 a 2 colheres de sopa cheias, 15 a 20g",
+        "Gergelim - 1 a 2 colheres de sopa cheias, 15 a 20g"
+      ],
+      bebida: [
+        "Café - 1 xícara ou 1 copo conforme a refeição",
+        "Chá - 1 xícara de chá, 240ml",
+        "Suco natural de morango - 1 copo americano, 150ml"
+      ]
+    };
+
+    const meals = {
+      cafeScreen: {
+        color: "#d97706",
+        title: "Café da manhã",
+        options: [
+          {
+            title: "Opção 1",
+            subtitle: "🥞 Crepioca + chia",
+            items: [
+              { name: "🥞 Crepioca + chia - 2 colheres de sopa, 50g + 1 ovo + 1 colher de sopa, 20g", group: "carbo" },
+              { name: "🍗 Frango desfiado - 2 colheres de sopa, 50g", group: "proteina" },
+              { name: "🍅 Tomate - 2 colheres de sopa, 30g", group: "legumes" },
+              { name: "☕ Café - 1 copo médio, 200ml", group: "bebida" }
+            ]
+          },
+          {
+            title: "Opção 2",
+            subtitle: "🌯 Rap10 integral com carne moída",
+            items: [
+              { name: "🌯 Rap10 integral - 1 unidade", group: "carbo" },
+              { name: "🥩 Carne moída - 2 fatias, 40g", group: "proteina" },
+              { name: "🍅 Tomate - à vontade", group: "legumes" },
+              { name: "🍵 Chá - 1 xícara de chá, 240ml", group: "bebida" }
+            ]
+          },
+          {
+            title: "Opção 3",
+            subtitle: "🍞 Pão francês com ovo cremoso",
+            items: [
+              { name: "🍞 Pão francês - 1 unidade", group: "carbo" },
+              { name: "🍳 Ovo cremoso (receita) - 2 receitas", group: "proteina" },
+              { name: "🍓 Suco natural de morango - 1 copo americano, 150ml", group: "fruta" }
+            ]
+          }
+        ]
+      },
+      lancheScreen: {
+        color: "#2563eb",
+        title: "Lanche da manhã",
+        options: [
+          {
+            title: "Opção 1",
+            subtitle: "🥛 Iogurte com granola",
+            items: [
+              { name: "🥛 Iogurte natural - 1 unidade, 170ml", group: "laticinio" },
+              { name: "🌾 Granola sem açúcar - 1 colher de sopa, 20g", group: "sementes" }
+            ]
+          },
+          {
+            title: "Opção 2",
+            subtitle: "🍈 Mamão com aveia",
+            items: [
+              { name: "🍈 Mamão papaia - 1/2 unidade", group: "fruta" },
+              { name: "🌾 Aveia em flocos - 1 colher de sopa, 20g", group: "sementes" }
+            ]
+          },
+          {
+            title: "Opção 3",
+            subtitle: "🍘 Torrada com requeijão light",
+            items: [
+              { name: "🍘 Torrada integral - 4 unidades", group: "carbo" },
+              { name: "🧀 Requeijão light - 1 colher de sopa, 20g", group: "laticinio" }
+            ]
+          }
+        ]
+      },
+      almocoScreen: {
+        color: "#16a34a",
+        title: "Almoço",
+        options: [
+          {
+            title: "Opção 1",
+            subtitle: "🍽️ Arroz integral, feijão e frango",
+            items: [
+              { name: "🍚 Arroz integral - 6 colheres de sopa, 150g", group: "carbo" },
+              { name: "🫘 Feijão - 1 concha, 80g", group: "leguminosa" },
+              { name: "🍗 Filé de frango grelhado - 1 filé, 150g", group: "proteina" },
+              { name: "🥦 Legumes cozidos - 2 colheres de servir, 100g", group: "legumes" },
+              { name: "🥬 Verduras folhosas - à vontade", group: "folhas" },
+              { name: "🍊 Fruta rica em vitamina C - 1 unidade", group: "frutaVitC" }
+            ]
+          },
+          {
+            title: "Opção 2",
+            subtitle: "🥔 Purê, lentilha e coxão mole",
+            items: [
+              { name: "🥔 Purê de batatas - 3 colheres de servir, 150g", group: "carbo" },
+              { name: "🫘 Lentilha - 2 colheres de servir, 80g", group: "leguminosa" },
+              { name: "🥩 Coxão mole - 3 pedaços, 150g", group: "proteina" },
+              { name: "🥕 Legumes cozidos - 2 colheres de servir, 100g", group: "legumes" },
+              { name: "🥬 Verduras folhosas - à vontade", group: "folhas" },
+              { name: "🍊 Fruta rica em vitamina C - 1 unidade", group: "frutaVitC" }
+            ]
+          },
+          {
+            title: "Opção 3",
+            subtitle: "🥗 Salada de macarrão",
+            items: [
+              { name: "🥗 Salada de macarrão (receita) - 5 colheres de servir, 600g", group: "carbo" }
+            ]
+          }
+        ]
+      },
+      lancheTardeScreen: {
+        color: "#7c3aed",
+        title: "Lanche da tarde",
+        options: [
+          {
+            title: "Opção 1",
+            subtitle: "🍞 Pão integral com ovo",
+            items: [
+              { name: "🍞 Pão integral - 2 fatias", group: "carbo" },
+              { name: "🥚 Ovo - 1 unidade", group: "proteina" },
+              { name: "🍅 Tomate - à vontade", group: "legumes" }
+            ]
+          },
+          {
+            title: "Opção 2",
+            subtitle: "🥞 Panqueca de banana",
+            items: [
+              { name: "🥞 Panqueca de banana (receita) - 1 receita", group: "carbo" }
+            ]
+          },
+          {
+            title: "Opção 3",
+            subtitle: "🥛 Iogurte com banana e aveia",
+            items: [
+              { name: "🥛 Iogurte zero - 1 unidade", group: "laticinio" },
+              { name: "🍌 Banana - 1 unidade", group: "fruta" },
+              { name: "🌾 Aveia - 1 colher de sopa, 20g", group: "sementes" }
+            ]
+          }
+        ]
+      },
+      jantarScreen: {
+        color: "#0f766e",
+        title: "Jantar",
+        options: [
+          {
+            title: "Opção 1",
+            subtitle: "🍛 Arroz, feijão e patinho",
+            items: [
+              { name: "🍚 Arroz - 3 colheres de servir, 150g", group: "carbo" },
+              { name: "🫘 Feijão - 1 concha, 80g", group: "leguminosa" },
+              { name: "🥩 Carne moída de patinho - 3 colheres de servir, 150g", group: "proteina" },
+              { name: "🥦 Legumes cozidos - 2 colheres de servir, 100g", group: "legumes" },
+              { name: "🥬 Verduras folhosas - à vontade", group: "folhas" }
+            ]
+          },
+          {
+            title: "Opção 2",
+            subtitle: "🌯 Rap10 integral com patinho",
+            items: [
+              { name: "🌯 Rap10 integral - 2 unidades", group: "carbo" },
+              { name: "🥩 Carne moída de patinho - 3 colheres de servir, 150g", group: "proteina" },
+              { name: "🥬 Alface - à vontade", group: "folhas" },
+              { name: "🍅 Tomate - à vontade", group: "legumes" }
+            ]
+          },
+          {
+            title: "Opção 3",
+            subtitle: "🥞 Crepioca + chia com frango",
+            items: [
+              { name: "🥞 Crepioca + chia - 2 colheres de sopa de tapioca + 1 ovo", group: "carbo" },
+              { name: "🍗 Frango desfiado - 4 colheres de sopa, 150g", group: "proteina" },
+              { name: "🍅 Tomate - 2 colheres de sopa, 30g", group: "legumes" },
+              { name: "🥬 Alface - à vontade", group: "folhas" }
+            ]
+          }
+        ]
+      },
+      ceiaScreen: {
+        color: "#be185d",
+        title: "Ceia",
+        options: [
+          {
+            title: "Opção 1",
+            subtitle: "🍘 Torrada com creme de ricota",
+            items: [
+              { name: "🍘 Torrada integral - 3 unidades", group: "carbo" },
+              { name: "🧀 Creme de ricota - 1 colher de sopa, 20g", group: "laticinio" },
+              { name: "🍵 Chá - 1 xícara de chá, 240ml", group: "bebida" }
+            ]
+          },
+          {
+            title: "Opção 2",
+            subtitle: "🍈 Mamão com aveia",
+            items: [
+              { name: "🍈 Mamão papaia - 1/2 unidade", group: "fruta" },
+              { name: "🌾 Aveia - 1 colher de sopa, 20g", group: "sementes" }
+            ]
+          },
+          {
+            title: "Opção 3",
+            subtitle: "🥛 Iogurte com granola",
+            items: [
+              { name: "🥛 Iogurte natural - 1 unidade", group: "laticinio" },
+              { name: "🌾 Granola sem açúcar - 1 colher de sopa, 20g", group: "sementes" }
+            ]
+          }
+        ]
+      }
+    };
+
+    const shoppingData = {
+      "Carboidratos": [
+        "Arroz branco","Arroz integral","Aveia","Batata doce","Batata inglesa","Cuscuz","Farelo de aveia","Macarrão integral",
+        "Mandioca","Mandioquinha","Milho","Pão de forma","Pão francês","Pão integral","Pão sírio","Polenta","Purê de batata",
+        "Quinoa","Rap10 integral","Tapioca","Torrada integral"
+      ],
+      "Frutas": [
+        "Abacate","Abacaxi","Acerola","Ameixa","Banana","Caju","Caqui","Goiaba","Kiwi","Laranja","Limão","Maçã",
+        "Mamão papaia","Manga","Melancia","Melão","Mexerica","Morango","Pêra","Pêssego","Uva"
+      ],
+      "Leguminosas": [
+        "Ervilha","Feijão branco","Feijão carioca","Feijão preto","Grão-de-bico","Lentilha","Soja"
+      ],
+      "Legumes e verduras": [
+        "Abobrinha","Abóbora","Acelga","Agrião","Alface","Alho","Berinjela","Beterraba","Brócolis","Cebola roxa","Cenoura","Chuchu",
+        "Couve","Couve-flor","Espinafre","Escarola","Palmito","Pimentão","Repolho","Rúcula","Tomate","Tomate cereja","Vagem"
+      ],
+      "Laticínios": [
+        "Creme de ricota","Iogurte grego","Iogurte natural","Iogurte zero","Leite desnatado","Leite integral","Leite semidesnatado",
+        "Minas frescal","Muçarela","Queijo branco","Queijo coalho","Queijo prato","Requeijão light","Ricota"
+      ],
+      "Proteínas": [
+        "Atum","Carne moída","Coxão mole","Filé de frango","Filé mignon","Frango desfiado","Lagarto","Lombo suíno magro",
+        "Maminha","Merluza","Ovos","Patinho","Peito de frango","Pescada","Tilápia"
+      ],
+      "Sementes e cereais": [
+        "Amaranto","Chia","Gergelim","Granola sem açúcar","Linhaça","Semente de abóbora","Semente de girassol"
+      ],
+      "Temperos e extras": [
+        "Açafrão","Adoçante","Café","Canela","Curry","Chá","Lemon pepper","Orégano","Páprica","Pimenta-do-reino","Salsinha"
+      ]
+    };
+
+    function openMeal(screenId){
+      document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function goHome(){
+      document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+      document.getElementById('home').classList.add('active');
+    }
+
+    function save(item){
+      favs.push(item);
+      localStorage.setItem('favs', JSON.stringify(favs));
+      alert('Salvo!');
+      loadFavorites();
+    }
+
+    function loadFavorites(){
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      if (favs.length === 0) {
+        const li = document.createElement('li');
+        li.innerText = 'Nenhum favorito salvo ainda.';
+        list.appendChild(li);
+        return;
+      }
+      favs.forEach(f => {
+        const li = document.createElement('li');
+        li.innerText = f;
+        list.appendChild(li);
+      });
+    }
+
+    function toggleSubs(id){
+      const box = document.getElementById(id);
+      box.classList.toggle('hidden');
+    }
+
+    function renderMealScreen(screenId){
+      const screen = document.getElementById(screenId);
+      const meal = meals[screenId];
+      if (!screen || !meal) return;
+
+      let html = `<button class="back-btn" onclick="goHome()">← Voltar</button>`;
+
+      meal.options.forEach((opt, optIndex) => {
+        html += `
+          <div class="card">
+            <h3 class="option-title" style="background:${meal.color};">${opt.title}</h3>
+            <div class="option-subtitle">${opt.subtitle}</div>
+            <ul class="details">
+              ${opt.items.map(item => `<li>${item.name}</li>`).join('')}
+            </ul>
+        `;
+
+        opt.items.forEach((item, itemIndex) => {
+          const subId = `${screenId}-opt${optIndex}-item${itemIndex}`;
+          const subs = substitutions[item.group] || [];
+          html += `
+            <div class="food-row">
+              <div class="food-title">${item.name}</div>
+              <button class="sub-btn" onclick="toggleSubs('${subId}')">Ver substituições</button>
+              <div id="${subId}" class="substitutions hidden">
+                <ul>
+                  ${subs.map(s => `<li>${s}</li>`).join('')}
+                </ul>
+                <div class="note">Trocas práticas da mesma categoria.</div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `<button onclick="save('${meal.title} - ${opt.title}')">Salvar</button></div>`;
+      });
+
+      html += `<button class="back-bottom-btn" onclick="goHome()">Voltar</button>`;
+      screen.innerHTML = html;
+    }
+
+    function renderShopping(){
+      const container = document.getElementById('shoppingContainer');
+      container.innerHTML = '';
+
+      Object.keys(shoppingData).sort().forEach(category => {
+        const title = document.createElement('div');
+        title.className = 'shopping-category';
+        title.innerText = category;
+        container.appendChild(title);
+
+        shoppingData[category].slice().sort().forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'shopping-item' + (shoppingChecks[item] ? ' checked' : '');
+          div.onclick = () => toggleShopping(item);
+
+          const checkbox = document.createElement('span');
+          checkbox.innerText = shoppingChecks[item] ? '✅' : '⬜';
+
+          const text = document.createElement('span');
+          text.innerText = item;
+
+          div.appendChild(checkbox);
+          div.appendChild(text);
+          container.appendChild(div);
+        });
+      });
+
+      renderPrintList();
+    }
+
+    function renderPrintList(){
+      const container = document.getElementById('printListContainer');
+      container.innerHTML = '';
+
+      const selectedItems = Object.keys(shoppingChecks).filter(item => shoppingChecks[item]).sort();
+
+      if (selectedItems.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'print-empty';
+        empty.innerText = 'Nenhum item marcado ainda.';
+        container.appendChild(empty);
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      ul.className = 'print-list';
+
+      selectedItems.forEach(item => {
+        const li = document.createElement('li');
+        li.innerText = item;
+        ul.appendChild(li);
+      });
+
+      container.appendChild(ul);
+    }
+
+    function toggleShopping(item){
+      shoppingChecks[item] = !shoppingChecks[item];
+      localStorage.setItem('shoppingChecks', JSON.stringify(shoppingChecks));
+      renderShopping();
+    }
+
+    function clearShopping(){
+      if (!confirm('Deseja limpar todos os itens marcados da lista?')) return;
+      shoppingChecks = {};
+      localStorage.setItem('shoppingChecks', JSON.stringify(shoppingChecks));
+      renderShopping();
+    }
+
+    async function shareShoppingList(){
+      const selectedItems = Object.keys(shoppingChecks).filter(item => shoppingChecks[item]).sort();
+
+      if (selectedItems.length === 0) {
+        alert('Marque pelo menos um item antes de compartilhar.');
+        return;
+      }
+
+      const text = "Minha lista de compras:\n\n" + selectedItems.map(i => "• " + i).join("\n");
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: 'Lista de compras',
+            text
+          });
+        } catch (e) {}
+      } else {
+        try {
+          await navigator.clipboard.writeText(text);
+          alert('Lista copiada para a área de transferência.');
+        } catch (e) {
+          alert(text);
+        }
+      }
+    }
+
+    function generateShoppingPDF(){
+      const selectedItems = Object.keys(shoppingChecks).filter(item => shoppingChecks[item]).sort();
+
+      if (selectedItems.length === 0) {
+        alert('Marque pelo menos um item antes de gerar o PDF.');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Lista de compras - Emilio Makoto Togashi", 14, 20);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+
+      let y = 32;
+      selectedItems.forEach((item) => {
+        doc.text(`• ${item}`, 14, y);
+        y += 8;
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+
+      doc.save("lista-de-compras-emilio.pdf");
+    }
+
+    Object.keys(meals).forEach(renderMealScreen);
+    loadFavorites();
+    renderShopping();
+  </script>
+</body>
+</html>

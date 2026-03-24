@@ -1,0 +1,9 @@
+{
+  "name": "Guia Alimentar - Emilio Makoto Togashi",
+  "short_name": "Guia Emilio",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#14532d",
+  "lang": "pt-BR"
+}
